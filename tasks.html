@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasklist</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Tasklist</h1>
+    </header>
+    <div class="user-panel">
+        <img src="image.png" alt="Foto do Usuário" class="user-photo">
+        <p class="user-name" id="user-name">Nome do Usuário</p>
+        <p class="task-count">Número de Tarefas: <span id="task-count">0</span></p>
+        <button type="button" class="button" onclick="logout()" style="margin-top: 20px;">Logout</button>
+    </div>
+    <div class="container">
+        <div class="form-container">
+            <h2>Tasklist</h2>
+            <form id="taskForm">
+                <div class="form-group">
+                    <label for="task-input">Nova Tarefa:</label>
+                    <input type="text" id="task-input" placeholder="Enter a task" required>
+                </div>
+                <button type="button" class="button" onclick="addTask()">Adicionar</button>
+            </form>
+            <ul id="task-list"></ul>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2025 Tasklist. Todos os direitos reservados.</p>
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>
