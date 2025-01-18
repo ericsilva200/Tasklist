@@ -167,3 +167,102 @@ function initializeTaskManager() {
 if (window.location.pathname.includes('tasks.html')) {
     initializeTaskManager();
 }
+let employees = loadEmployees();
+
+// Função para carregar os funcionários do localStorage
+function loadEmployees() {
+    const storedEmployees = localStorage.getItem('employees');
+    return storedEmployees ? JSON.parse(storedEmployees) : [];
+}
+
+// Função para salvar os funcionários no localStorage
+function saveEmployees() {
+    localStorage.setItem('employees', JSON.stringify(employees));
+}
+
+// Função para carregar as tarefas de todos os usuários do Local Storage
+function loadAllTasks() {
+    let allTasks = [];
+    users.forEach(user => {
+        allTasks = allTasks.concat(user.tasks);
+    });
+    return Array.from(new Set(allTasks)); // Remove tarefas duplicadas, se houver
+}
+
+// Função para adicionar um novo funcionário
+function addEmployee() {
+    const name = document.getElementById('employee-name').value;
+    const age = document.getElementById('employee-age').value;
+    const position = document.getElementById('employee-position').value;
+    const selectedTasks = Array.from(document.getElementById('employee-tasks').selectedOptions)
+                               .map(option => option.value);
+
+    // Validação dos campos
+    if (!name || !age || !position) {
+        alert('Por favor, preencha todos os campos.');
+        return;
+    }
+
+    // Criação do objeto do funcionário
+    const newEmployee = {
+        name: name,
+        age: age,
+        position: position,
+        tasks: selectedTasks
+    };
+
+    // Adiciona o novo funcionário ao array de funcionários
+    employees.push(newEmployee);
+
+    // Salva os funcionários no localStorage
+    saveEmployees();
+
+    // Limpa o formulário
+    document.getElementById('employeeForm').reset();
+
+    // Exibe a lista de funcionários
+    renderEmployeeList();
+}
+
+
+// Função para renderizar a lista de funcionários na tela
+function renderEmployeeList() {
+    const employeeList = document.getElementById('employee-list');
+    employeeList.innerHTML = '';  // Limpa a lista antes de renderizar novamente
+
+    // Cria a lista de funcionários
+    employees.forEach(employee => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `Nome: ${employee.name}, Idade: ${employee.age}, Cargo: ${employee.position}, Tarefas: ${employee.tasks.join(', ')}`;
+        employeeList.appendChild(listItem);
+    });
+}
+
+
+// Função para carregar as tarefas disponíveis no Local Storage
+function renderTaskOptions() {
+    const taskSelect = document.getElementById('employee-tasks');
+    taskSelect.innerHTML = '';  // Limpa as opções antes de carregar novamente
+
+    // Carrega todas as tarefas dos usuários
+    const allTasks = loadAllTasks();
+
+    // Preenche o campo de tarefas com as tarefas disponíveis
+    allTasks.forEach(task => {
+        const option = document.createElement('option');
+        option.value = task;
+        option.textContent = task;
+        taskSelect.appendChild(option);
+    });
+}
+
+// Função para inicializar a página (carregar tarefas e exibir funcionários)
+function initializePage() {
+    renderTaskOptions();  // Carregar tarefas no select
+    renderEmployeeList();  // Exibir funcionários cadastrados
+}
+
+// Chama a inicialização da página
+initializePage();
+
+
