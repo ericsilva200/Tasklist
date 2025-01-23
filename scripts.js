@@ -227,15 +227,21 @@ function addEmployee() {
 
 // Função para renderizar a lista de funcionários na tela
 function renderEmployeeList() {
-    const employeeList = document.getElementById('employee-list');
-    employeeList.innerHTML = '';  // Limpa a lista antes de renderizar novamente
+    currentUser = loadCurrentUser(); // Carregar o usuário atual
+    if (!currentUser) {
+        alert('No user is logged in.');
+        showLogin();
+    } else {
+        const employeeList = document.getElementById('employee-list');
+        employeeList.innerHTML = '';  // Limpa a lista antes de renderizar novamente
 
-    // Cria a lista de funcionários
-    employees.forEach(employee => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `Nome: ${employee.name}, Idade: ${employee.age}, Cargo: ${employee.position}, Tarefas: ${employee.tasks.join(', ')}`;
-        employeeList.appendChild(listItem);
-    });
+        // Cria a lista de funcionários
+        employees.forEach(employee => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `Nome: ${employee.name}, Idade: ${employee.age}, Cargo: ${employee.position}, Tarefas: ${employee.tasks.join(', ')}`;
+            employeeList.appendChild(listItem);
+        });
+    }
 }
 
 
