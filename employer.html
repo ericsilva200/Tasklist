@@ -8,38 +8,24 @@
 </head>
 <body>
     <navbar-component></navbar-component>
-    
+    <div class="user-panel" style="margin-top: 50px;">
+        <img src="image.png" alt="Foto do Usuário" class="user-photo">
+        <p class="user-name" id="user-name">Nome do Usuário</p>
+        <p class="employee-count">Número de Funcionários: <span id="employee-count">0</span></p>
+        <button type="button" class="button" onclick="logout()" style="margin-top: 20px;">Logout</button>
+    </div>
     <div class="container">
         <div class="form-container">
-            <h2>Cadastro de Funcionário</h2>
-            <form id="employeeForm">
-                <div class="form-group">
-                    <label for="employee-name">Nome:</label>
-                    <input type="text" id="employee-name" placeholder="Digite o nome" required>
-                </div>
-                <div class="form-group">
-                    <label for="employee-age">Idade:</label>
-                    <input type="number" id="employee-age" placeholder="Digite a idade" required>
-                </div>
-                <div class="form-group">
-                    <label for="employee-position">Cargo:</label>
-                    <input type="text" id="employee-position" placeholder="Digite o cargo" required>
-                </div>
-                <div class="form-group">
-                    <label for="employee-tasks">Tarefas:</label>
-                    <select id="employee-tasks" multiple>
-                        <!-- As tarefas serão carregadas dinamicamente aqui -->
-                    </select>
-                </div>
-                <button type="button" class="button" onclick="addEmployee()">Adicionar Funcionário</button>
+            <h2>Novo Funcionário</h2>
+            <form id="employee-form">
+            <input type="text" id="employee-name" placeholder="Nome do Funcionário" required>
+            <input type="text" id="employee-position" placeholder="Cargo" required>
+            <button type="button" onclick="createEmployee()">Criar Funcionário</button>
             </form>
-        </div>
-
-        <div class="employee-list">
-            <h3>Lista de Funcionários</h3>
-            <ul id="employee-list">
-                <!-- Funcionários cadastrados serão listados aqui -->
-            </ul>
+            
+            <!-- Lista de Funcionários -->
+            <h2>Funcionários</h2>
+            <div id="employee-list"></div>
         </div>
     </div>
 

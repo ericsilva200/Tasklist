@@ -1,17 +1,10 @@
+const API_BASE_URL = 'http://localhost:8080';
+
 // Inicializar estado de autenticação
-let users = loadUsers();
 let currentUser = loadCurrentUser();
 let isAuthenticated = currentUser !== null;
 
-// Funções para persistência de dados no Local Storage
-function saveUsers() {
-    localStorage.setItem('users', JSON.stringify(users));
-}
-
-function loadUsers() {
-    const storedUsers = localStorage.getItem('users');
-    return storedUsers ? JSON.parse(storedUsers) : [];
-}
+// // Funções para persistência de dados no Local Storage
 
 function saveCurrentUser() {
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -38,33 +31,52 @@ function showTaskManager() {
 }
 
 // Função para registrar um usuário
-function registerUser() {
-    const name = document.getElementById('register-name').value;
+async function registerUser() {
+    const nome = document.getElementById('register-name').value;
     const email = document.getElementById('register-email').value;
-    const password = document.getElementById('register-password').value;
+    const senha = document.getElementById('register-password').value;
 
-    if(!name || !email || !password){
+    if(!nome || !email || !senha){
         alert("Please fill in all fields.")
         return;
     }
-    if (users.find(user => user.email === email)) {
-        alert('Email already registered.');
-        return;
-    }
 
-    users.push({ name, email, password, tasks: [] });
-    saveUsers(); // Salvar no Local Storage
-    alert('Registration successful! You can now login.');
-    showLogin();
+    try {
+        const response = await fetch(`${API_BASE_URL}/users`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome, email, senha })
+        });
+
+        if (!response.ok) throw new Error("Error registering User.");
+
+        alert("Registration successful! You can now login.");
+        showLogin();
+    } catch (error) {
+        console.error(error);
+        alert("Error registering User.");
+    }
+    
 }
 
 // Função para autenticar um usuário
-function authenticateUser() {
+async function authenticateUser() {
     const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
+    const senha = document.getElementById('login-password').value;
 
-    const user = users.find(user => user.email === email && user.password === password);
+    if(!email || !senha){
+        alert("Please fill in all fields.")
+        return;
+    }
 
+    //Obtém todos os usuários
+    const response = await fetch(`${API_BASE_URL}/users`);
+    if (!response.ok) throw new Error("Error loading users.");
+
+    const storedUsers = await response.json();
+
+    const user = storedUsers.find(user => user.email === email && user.senha === senha);
+    
     if (user) {
         isAuthenticated = true;
         currentUser = user;
@@ -74,71 +86,7 @@ function authenticateUser() {
     } else {
         alert('Invalid email or password.');
     }
-}
 
-// Função para adicionar uma tarefa
-function addTask() {
-    currentUser = loadCurrentUser(); // Atualizar o estado do usuário atual
-    isAuthenticated = currentUser !== null; // Atualizar o estado de autenticação
-
-    if (!isAuthenticated) {
-        alert('You must be logged in to manage tasks.');
-        return;
-    }
-
-    const taskInput = document.getElementById('task-input');
-
-    if (taskInput.value.trim() === '') {
-        alert('Task cannot be empty.');
-        return;
-    }
-
-    currentUser.tasks.push(taskInput.value); // Adiciona a tarefa ao usuário atual
-    updateUserInUsersArray(currentUser); // Atualiza o usuário no array `users`
-    saveUsers(); // Salva o array atualizado no Local Storage
-    saveCurrentUser(); // Atualiza o `currentUser` no Local Storage
-    loadTasks();
-
-    taskInput.value = '';
-}
-
-// Atualizar o array `users` com as mudanças feitas no `currentUser`
-function updateUserInUsersArray(updatedUser) {
-    users = users.map(user =>
-        user.email === updatedUser.email ? updatedUser : user
-    );
-}
-
-// Função para carregar tarefas do usuário atual
-function loadTasks() {
-    currentUser = loadCurrentUser(); // Carregar o usuário atual
-    if (!currentUser) {
-        alert('No user is logged in.');
-        showLogin();
-        return;
-    }
-
-    const taskList = document.getElementById('task-list');
-    taskList.innerHTML = '';
-    document.getElementById('task-count').textContent = currentUser.tasks.length;
-    currentUser.tasks.forEach((task, index) => {
-        const listItem = document.createElement('li');
-        listItem.textContent = task;
-
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Remove';
-        deleteButton.style.marginLeft = '10px';
-        deleteButton.onclick = function () {
-            currentUser.tasks.splice(index, 1);
-            updateUserInUsersArray(currentUser); // Atualiza o usuário no array `users`
-            saveUsers(); // Salva o array atualizado no Local Storage
-            saveCurrentUser(); // Atualiza o `currentUser` no Local Storage
-            loadTasks();
-        };
-
-        listItem.appendChild(deleteButton);
-        taskList.appendChild(listItem);
-    });
 }
 
 // Função para realizar logout
@@ -157,8 +105,7 @@ function initializeTaskManager() {
         alert('No user is logged in.');
         showLogin();
     } else {
-        document.getElementById('user-name').textContent = currentUser.name;
-        document.getElementById('task-count').textContent = currentUser.tasks.length;
+        document.getElementById('user-name').textContent = currentUser.nome;
         loadTasks(); // Carregar as tarefas do usuário
     }
 }
@@ -167,108 +114,174 @@ function initializeTaskManager() {
 if (window.location.pathname.includes('tasks.html')) {
     initializeTaskManager();
 }
-let employees = loadEmployees();
 
-// Função para carregar os funcionários do localStorage
-function loadEmployees() {
-    const storedEmployees = localStorage.getItem('employees');
-    return storedEmployees ? JSON.parse(storedEmployees) : [];
-}
-
-// Função para salvar os funcionários no localStorage
-function saveEmployees() {
-    localStorage.setItem('employees', JSON.stringify(employees));
-}
-
-// Função para carregar as tarefas de todos os usuários do Local Storage
-function loadAllTasks() {
-    let allTasks = [];
-    users.forEach(user => {
-        allTasks = allTasks.concat(user.tasks);
-    });
-    return Array.from(new Set(allTasks)); // Remove tarefas duplicadas, se houver
-}
-
-// Função para adicionar um novo funcionário
-function addEmployee() {
-    const name = document.getElementById('employee-name').value;
-    const age = document.getElementById('employee-age').value;
-    const position = document.getElementById('employee-position').value;
-    const selectedTasks = Array.from(document.getElementById('employee-tasks').selectedOptions)
-                               .map(option => option.value);
-
-    // Validação dos campos
-    if (!name || !age || !position) {
-        alert('Por favor, preencha todos os campos.');
-        return;
-    }
-
-    // Criação do objeto do funcionário
-    const newEmployee = {
-        name: name,
-        age: age,
-        position: position,
-        tasks: selectedTasks
-    };
-
-    // Adiciona o novo funcionário ao array de funcionários
-    employees.push(newEmployee);
-
-    // Salva os funcionários no localStorage
-    saveEmployees();
-
-    // Limpa o formulário
-    document.getElementById('employeeForm').reset();
-
-    // Exibe a lista de funcionários
-    renderEmployeeList();
-}
-
-
-// Função para renderizar a lista de funcionários na tela
-function renderEmployeeList() {
+// Verificar se o usuário está autenticado na página de funcionários
+function initializeEmployeeManager() {
     currentUser = loadCurrentUser(); // Carregar o usuário atual
     if (!currentUser) {
         alert('No user is logged in.');
         showLogin();
     } else {
-        const employeeList = document.getElementById('employee-list');
-        employeeList.innerHTML = '';  // Limpa a lista antes de renderizar novamente
-
-        // Cria a lista de funcionários
-        employees.forEach(employee => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `Nome: ${employee.name}, Idade: ${employee.age}, Cargo: ${employee.position}, Tarefas: ${employee.tasks.join(', ')}`;
-            employeeList.appendChild(listItem);
-        });
+        document.getElementById('user-name').textContent = currentUser.nome;
+        loadEmployees(); // Carregar as tarefas do usuário
     }
 }
 
-
-// Função para carregar as tarefas disponíveis no Local Storage
-function renderTaskOptions() {
-    const taskSelect = document.getElementById('employee-tasks');
-    taskSelect.innerHTML = '';  // Limpa as opções antes de carregar novamente
-
-    // Carrega todas as tarefas dos usuários
-    const allTasks = loadAllTasks();
-
-    // Preenche o campo de tarefas com as tarefas disponíveis
-    allTasks.forEach(task => {
-        const option = document.createElement('option');
-        option.value = task;
-        option.textContent = task;
-        taskSelect.appendChild(option);
-    });
+// Inicialização automática para a página de funcionários
+if (window.location.pathname.includes('employer.html')) {
+    initializeEmployeeManager();
 }
 
-// Função para inicializar a página (carregar tarefas e exibir funcionários)
-function initializePage() {
-    renderTaskOptions();  // Carregar tarefas no select
-    renderEmployeeList();  // Exibir funcionários cadastrados
+
+// Verifica qual página está ativa e carrega apenas os dados necessários
+document.addEventListener('DOMContentLoaded', () => {
+    const taskSection = document.getElementById('task-list');
+    const employeeSection = document.getElementById('employee-list');
+
+    if (taskSection) {
+        loadTasks();
+    }
+
+    if (employeeSection) {
+        loadEmployees();
+    }
+});
+
+// Criar uma nova tarefa
+async function createTask() {
+    const title = document.getElementById('task-title')?.value.trim();
+    const description = document.getElementById('task-desc')?.value.trim();
+
+    if (!title || !description) {
+        alert("Preencha todos os campos.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, description, completed: false })
+        });
+
+        if (!response.ok) throw new Error("Erro ao criar tarefa.");
+
+        alert("Tarefa criada com sucesso!");
+        document.getElementById('task-form')?.reset(); // Limpar formulário
+        loadTasks();
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao cadastrar tarefa.");
+    }
 }
 
-// Chama a inicialização da página
-initializePage();
+// Carregar tarefas e exibi-las na lista
+async function loadTasks() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks`);
+        if (!response.ok) throw new Error("Erro ao carregar tarefas.");
+
+        const tasks = await response.json();
+        document.getElementById('task-count').textContent = tasks.length;
+        const taskList = document.getElementById('task-list');
+        if (!taskList) return;
+
+        taskList.innerHTML = '';
+
+        tasks.forEach(task => {
+            const taskElement = document.createElement('div');
+            taskElement.classList.add('task');
+            taskElement.innerHTML = `
+                <strong>${task.title}</strong> - ${task.description} <br>
+                <button class="assign-btn" onclick="assignTask(${task.id})">Vincular Funcionário</button>
+            `;
+            taskList.appendChild(taskElement);
+        });
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao carregar tarefas.");
+    }
+}
+
+// Criar funcionário
+async function createEmployee() {
+    const name = document.getElementById('employee-name')?.value.trim();
+    const position = document.getElementById('employee-position')?.value.trim();
+
+    if (!name || !position) {
+        alert("Preencha todos os campos.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/employees`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, position })
+        });
+
+        if (!response.ok) throw new Error("Erro ao criar funcionário.");
+
+        alert("Funcionário criado com sucesso!");
+        document.getElementById('employee-form')?.reset(); // Limpar formulário
+        loadEmployees();
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao cadastrar funcionário.");
+    }
+}
+
+// Carregar funcionários e exibi-los na lista
+async function loadEmployees() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/employees`);
+        if (!response.ok) throw new Error("Erro ao carregar funcionários.");
+
+        const employees = await response.json();
+        document.getElementById('employee-count').textContent = employees.length;
+        const employeeList = document.getElementById('employee-list');
+        if (!employeeList) return;
+
+        employeeList.innerHTML = '';
+
+        employees.forEach(employee => {
+            const employeeElement = document.createElement('div');
+            employeeElement.classList.add('employee');
+            employeeElement.innerHTML = `<strong>${employee.name}</strong> (${employee.position})`;
+            employeeList.appendChild(employeeElement);
+        });
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao carregar funcionários.");
+    }
+}
+
+// Vincular uma tarefa a um funcionário
+async function assignTask(taskId) {
+    let employeeId = prompt('Digite o ID do Funcionário para vincular a tarefa:');
+    if (!employeeId || isNaN(employeeId)) {
+        alert("ID inválido!");
+        return;
+    }
+ 
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks/${taskId}/assign-employee/${employeeId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' }
+        });
+ 
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ao vincular: ${errorText}`);
+        }
+ 
+        alert("Tarefa vinculada com sucesso!");
+        loadTasks();
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao vincular funcionário à tarefa.");
+    }
+ }
+
 
 

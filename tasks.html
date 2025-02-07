@@ -16,15 +16,18 @@
     </div>
     <div class="container">
         <div class="form-container">
-            <h2>Tasklist</h2>
-            <form id="taskForm">
-                <div class="form-group">
-                    <label for="task-input">Nova Tarefa:</label>
-                    <input type="text" id="task-input" placeholder="Enter a task" required>
-                </div>
-                <button type="button" class="button" onclick="addTask()">Adicionar</button>
+            <!-- Formulário para Criar Tarefa -->
+            <h2>Nova Tarefa</h2>
+                <form id="task-form">
+                <input type="text" id="task-title" placeholder="Título da Tarefa" required>
+                <input type="text" id="task-desc" placeholder="Descrição" required>
+                <button type="button" onclick="createTask()">Criar Tarefa</button>
             </form>
-            <ul id="task-list"></ul>
+
+            <!-- Lista de Tarefas -->
+            <h2>Tarefas</h2>
+            <div id="task-list"></div>
+
         </div>
     </div>
     <footer>
