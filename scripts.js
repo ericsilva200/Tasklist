@@ -98,6 +98,43 @@ function logout() {
     showLogin();
 }
 
+// Obtém todos os funcionários
+async function getEmployees() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/employees`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error("Erro ao obter os funcionários.");
+        
+        
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+    }
+  }
+
+
+async function populateEmployeeSelect() {
+    try {   
+        const selectElement = document.getElementById("employeeSelect");
+
+        const employees = await getEmployees(); // Aqui substituir por fetch real
+
+        selectElement.innerHTML = ""; // Limpa o select antes de adicionar novas opções
+
+        employees.forEach(employee => {
+            const option = document.createElement("option");
+            option.value = employee.id;
+            option.textContent = `Nome: ${employee.name} - Cargo: ${employee.position}`;
+            selectElement.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Erro ao carregar funcionários:", error);
+        selectElement.innerHTML = "<option value=''>Erro ao carregar</option>";
+    }
+}
 // Verificar se o usuário está autenticado na página de tarefas
 function initializeTaskManager() {
     currentUser = loadCurrentUser(); // Carregar o usuário atual
@@ -105,6 +142,7 @@ function initializeTaskManager() {
         alert('No user is logged in.');
         showLogin();
     } else {
+        populateEmployeeSelect();
         document.getElementById('user-name').textContent = currentUser.nome;
         loadTasks(); // Carregar as tarefas do usuário
     }
@@ -133,26 +171,13 @@ if (window.location.pathname.includes('employer.html')) {
 }
 
 
-// Verifica qual página está ativa e carrega apenas os dados necessários
-document.addEventListener('DOMContentLoaded', () => {
-    const taskSection = document.getElementById('task-list');
-    const employeeSection = document.getElementById('employee-list');
-
-    if (taskSection) {
-        loadTasks();
-    }
-
-    if (employeeSection) {
-        loadEmployees();
-    }
-});
-
 // Criar uma nova tarefa
 async function createTask() {
     const title = document.getElementById('task-title')?.value.trim();
     const description = document.getElementById('task-desc')?.value.trim();
+    const employee = document.getElementById('employeeSelect')?.value;
 
-    if (!title || !description) {
+    if (!title || !description || !employee) {
         alert("Preencha todos os campos.");
         return;
     }
@@ -161,10 +186,13 @@ async function createTask() {
         const response = await fetch(`${API_BASE_URL}/tasks`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, description, completed: false })
+            body: JSON.stringify({ title, description, completed: false})
         });
 
         if (!response.ok) throw new Error("Erro ao criar tarefa.");
+
+        const task = await response.json();
+        assignTask(task.id, employee);
 
         alert("Tarefa criada com sucesso!");
         document.getElementById('task-form')?.reset(); // Limpar formulário
@@ -175,6 +203,41 @@ async function createTask() {
     }
 }
 
+// Deletar tarefa
+async function deleteTask(id) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error("Erro ao deletar tarefa.");
+
+        alert("Tarefa deletada com sucesso!");
+        loadTasks();
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao deletar tarefa.");
+    }
+}
+
+// Completar tarefa
+async function completedTask(id) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks/completed/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) throw new Error("Erro ao completar tarefa.");
+
+        alert("Tarefa completada com sucesso!");
+        loadTasks();
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao completar tarefa.");
+    }
+}
 // Carregar tarefas e exibi-las na lista
 async function loadTasks() {
     try {
@@ -192,9 +255,32 @@ async function loadTasks() {
             const taskElement = document.createElement('div');
             taskElement.classList.add('task');
             taskElement.innerHTML = `
-                <strong>${task.title}</strong> - ${task.description} <br>
-                <button class="assign-btn" onclick="assignTask(${task.id})">Vincular Funcionário</button>
+                <p><strong>Tarefa: ${task.title}</strong></p><br>
+                <p>Descrição: ${task.description}</p><br>
+                <p>Responsável: ${task.employee.name}</p><br>
+                <p>Status: ${task.completed === true ? "Concluida" : "Em andamento"}</p><br>
             `;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Deletar';
+            deleteButton.style.marginLeft = '10px';
+            deleteButton.onclick = function () {
+                deleteTask(task.id)
+                loadTasks();
+            };
+
+            if(task.completed === false){
+                const completedButton = document.createElement('button');
+                completedButton.textContent = 'Concluir';
+                completedButton.style.marginLeft = '10px';
+                completedButton.onclick = function () {
+                    completedTask(task.id)
+                    loadTasks();
+                };
+
+                taskElement.appendChild(completedButton);
+            }
+            taskElement.appendChild(deleteButton);
             taskList.appendChild(taskElement);
         });
     } catch (error) {
@@ -257,8 +343,8 @@ async function loadEmployees() {
 }
 
 // Vincular uma tarefa a um funcionário
-async function assignTask(taskId) {
-    let employeeId = prompt('Digite o ID do Funcionário para vincular a tarefa:');
+async function assignTask(taskId, employeeId) {
+
     if (!employeeId || isNaN(employeeId)) {
         alert("ID inválido!");
         return;
@@ -275,11 +361,9 @@ async function assignTask(taskId) {
             throw new Error(`Erro ao vincular: ${errorText}`);
         }
  
-        alert("Tarefa vinculada com sucesso!");
         loadTasks();
     } catch (error) {
         console.error(error);
-        alert("Erro ao vincular funcionário à tarefa.");
     }
  }
 

@@ -18,9 +18,13 @@
         <div class="form-container">
             <!-- Formulário para Criar Tarefa -->
             <h2>Nova Tarefa</h2>
-                <form id="task-form">
+            <form id="task-form">
                 <input type="text" id="task-title" placeholder="Título da Tarefa" required>
                 <input type="text" id="task-desc" placeholder="Descrição" required>
+                <label for="employeeSelect">Selecione um funcionário responsável:</label>
+                <select id="employeeSelect">
+                    <option value="">Carregando...</option>
+                </select>
                 <button type="button" onclick="createTask()">Criar Tarefa</button>
             </form>
 
