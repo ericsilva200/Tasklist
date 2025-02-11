@@ -115,7 +115,7 @@ async function getEmployees() {
     }
   }
 
-
+// Popula o select de funcionários
 async function populateEmployeeSelect() {
     try {   
         const selectElement = document.getElementById("employeeSelect");
