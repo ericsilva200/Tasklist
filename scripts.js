@@ -255,13 +255,17 @@ async function loadTasks() {
             const taskElement = document.createElement('div');
             taskElement.classList.add('task');
             taskElement.innerHTML = `
-                <p><strong>Tarefa: ${task.title}</strong></p><br>
-                <p>Descrição: ${task.description}</p><br>
-                <p>Responsável: ${task.employee.name}</p><br>
-                <p>Status: ${task.completed === true ? "Concluida" : "Em andamento"}</p><br>
+                <p><strong>${task.title}</strong></p><br>
+                <p>${task.description}</p><br>
+                <p>${task.employee.name}</p><br>
+                <p>${task.completed === true ? "Concluida" : "Em andamento"}</p><br>
             `;
 
+            const divButton = document.createElement('div');
+            divButton.classList.add('div-button-task');
             const deleteButton = document.createElement('button');
+            deleteButton.className = "button-task";
+            deleteButton.id = "delete-button";
             deleteButton.textContent = 'Deletar';
             deleteButton.style.marginLeft = '10px';
             deleteButton.onclick = function () {
@@ -271,6 +275,8 @@ async function loadTasks() {
 
             if(task.completed === false){
                 const completedButton = document.createElement('button');
+                completedButton.className = "button-task";
+                completedButton.id = "completed-button";
                 completedButton.textContent = 'Concluir';
                 completedButton.style.marginLeft = '10px';
                 completedButton.onclick = function () {
@@ -278,9 +284,10 @@ async function loadTasks() {
                     loadTasks();
                 };
 
-                taskElement.appendChild(completedButton);
+                divButton.appendChild(completedButton);
             }
-            taskElement.appendChild(deleteButton);
+            divButton.appendChild(deleteButton);
+            taskElement.appendChild(divButton)
             taskList.appendChild(taskElement);
         });
     } catch (error) {
