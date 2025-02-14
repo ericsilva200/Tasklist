@@ -248,21 +248,21 @@ async function loadTasks() {
         document.getElementById('task-count').textContent = tasks.length;
         const taskList = document.getElementById('task-list');
         if (!taskList) return;
-
+		
         taskList.innerHTML = '';
-
+		
         tasks.forEach(task => {
-            const taskElement = document.createElement('div');
+            const taskElement = document.createElement('tr');
             taskElement.classList.add('task');
             taskElement.innerHTML = `
-                <p><strong>${task.title}</strong></p><br>
-                <p>${task.description}</p><br>
-                <p>${task.employee.name}</p><br>
-                <p>${task.completed === true ? "Concluida" : "Em andamento"}</p><br>
+                <td><strong>${task.title}</strong></td>
+                <td>${task.description}</td>
+                <td>${task.employee.name}</td>
+				<td>${task.completed === true ? "Concluida" : "Em andamento"}</td>
             `;
 
-            const divButton = document.createElement('div');
-            divButton.classList.add('div-button-task');
+            const divButton = document.createElement('td');
+            //divButton.classList.add('div-button-task');
             const deleteButton = document.createElement('button');
             deleteButton.className = "button-task";
             deleteButton.id = "delete-button";
@@ -286,8 +286,10 @@ async function loadTasks() {
 
                 divButton.appendChild(completedButton);
             }
+            
+            
             divButton.appendChild(deleteButton);
-            taskElement.appendChild(divButton)
+            taskElement.appendChild(divButton);
             taskList.appendChild(taskElement);
         });
     } catch (error) {

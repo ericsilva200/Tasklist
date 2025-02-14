@@ -59,7 +59,6 @@ header h1 {
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 80%;
-    /* max-width: 400px; */
     padding: 20px;
 }
 
@@ -69,7 +68,7 @@ header h1 {
     margin-bottom: 20px;
 }
 
-#task-form, #employee-form {
+#task-form, #employee-form, .form-group {
     margin-bottom: 15px;
     display: flex;
     flex-direction: column;
@@ -83,7 +82,7 @@ header h1 {
     margin-bottom: 5px;
 }
 
-#task-form input, #employee-form input {
+input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
@@ -91,7 +90,7 @@ header h1 {
     font-size: 14px;
 }
 
-#task-form input:focus, #employee-form input:focus{
+input:focus{
     border-color: #007bff;
     outline: none;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
@@ -118,12 +117,7 @@ header h1 {
 .button:hover {
     background-color: #0056b3;
 }
-#title-task{
-    display: flex;
-    justify-content: space-between;
-    padding-right: 20px;
-    
-}
+
 #task-list{
     display: flex;
     flex-direction: column;
@@ -136,6 +130,24 @@ header h1 {
     align-items: center;
     gap: 10px;
 }
+
+table {
+    width: 100%; /* Garante que a tabela ocupe todo o espaço disponível */
+    border-collapse: collapse; /* Remove espaçamentos entre as células */
+}
+
+td {
+    text-align: left; /* Alinha o texto à esquerda */
+    padding: 8px; /* Dá um espaçamento interno */
+    display: table-cell; /* Mantém o comportamento padrão da tabela */
+}
+
+td:nth-child(1) { width: 15%; } /* Primeira coluna */
+td:nth-child(2) { width: 40%; } /* Segunda coluna */
+td:nth-child(3) { width: 20%; } /* Terceira coluna */
+td:nth-child(4) { width: 10%; } /* Quarta coluna */
+td:nth-child(5) { width: 25%; } /* Quinta coluna */
+
 
 .button-task{
     padding: 10px;
